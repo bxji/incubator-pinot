@@ -89,13 +89,6 @@ public class ZKOperator {
     OfflineSegmentZKMetadata existingSegmentZKMetadata = new OfflineSegmentZKMetadata(znRecord);
     long existingCrc = existingSegmentZKMetadata.getCrc();
 
-    // Set the download URL.
-    existingSegmentZKMetadata.setDownloadUrl(zkDownloadURI);
-
-    // Set the crypter name (even if null, so it can be removed from metadata).
-    String crypter = headers.getHeaderString(FileUploadDownloadClient.CustomHeaders.CRYPTER);
-    existingSegmentZKMetadata.setCrypterName(crypter);
-
     // Check if CRC match when IF-MATCH header is set
     checkCRC(headers, offlineTableName, segmentName, existingCrc);
 
@@ -176,7 +169,9 @@ public class ZKOperator {
               zkDownloadURI);
         }
 
-        _pinotHelixResourceManager.refreshSegment(offlineTableName, segmentMetadata, existingSegmentZKMetadata);
+        String crypter = headers.getHeaderString(FileUploadDownloadClient.CustomHeaders.CRYPTER);
+        _pinotHelixResourceManager
+            .refreshSegment(offlineTableName, segmentMetadata, existingSegmentZKMetadata, zkDownloadURI, crypter);
       }
     } catch (Exception e) {
       if (!_pinotHelixResourceManager.updateZkMetadata(offlineTableName, existingSegmentZKMetadata)) {
