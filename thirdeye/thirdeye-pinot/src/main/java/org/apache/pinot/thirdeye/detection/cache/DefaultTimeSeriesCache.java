@@ -84,8 +84,6 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   }
 
 
-  // NOTE: we will pretend the case where there are missing documents
-  //       within the returned time-series doesn't exist.
   private void fetchMissingSlices(ThirdEyeCacheResponse cacheResponse) throws Exception {
 
     ThirdEyeRequest request = cacheResponse.getCacheRequest().getRequest();

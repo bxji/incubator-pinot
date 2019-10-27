@@ -126,26 +126,26 @@ public class DefaultDataProvider implements DataProvider {
       long ts = System.currentTimeMillis();
       Map<MetricSlice, DataFrame> output = new HashMap<>();
 
-      // if the time series slice is already in cache, return directly
-      for (MetricSlice slice : slices){
-        LOG.info(slice.toString());
-        for (Map.Entry<MetricSlice, DataFrame> entry : DETECTION_TIME_SERIES_CACHE.asMap().entrySet()) {
-          // current slice potentially contained in cache
-          if (entry.getKey().containSlice(slice)){
-            DataFrame df = entry.getValue().filter(entry.getValue().getLongs(COL_TIME).between(slice.getStart(), slice.getEnd())).dropNull(COL_TIME);
-            // double check if it is cache hit
-            if (df.getLongs(COL_TIME).size() > 0) {
-              output.put(slice, df);
-              break;
-            }
-          }
-        }
-      }
+//      // if the time series slice is already in cache, return directly
+//      for (MetricSlice slice : slices){
+//        LOG.info(slice.toString());
+//        for (Map.Entry<MetricSlice, DataFrame> entry : DETECTION_TIME_SERIES_CACHE.asMap().entrySet()) {
+//          // current slice potentially contained in cache
+//          if (entry.getKey().containSlice(slice)){
+//            DataFrame df = entry.getValue().filter(entry.getValue().getLongs(COL_TIME).between(slice.getStart(), slice.getEnd())).dropNull(COL_TIME);
+//            // double check if it is cache hit
+//            if (df.getLongs(COL_TIME).size() > 0) {
+//              output.put(slice, df);
+//              break;
+//            }
+//          }
+//        }
+//      }
 
       // if not in cache, fetch from data source
       Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
 
-      boolean runBryanPoC = false;
+      boolean runBryanPoC = true;
       if (runBryanPoC) {
         Map<Long, MetricSlice> ranges = CacheUtils.findMaxRangeInterval(slices);
         for (MetricSlice slice : ranges.values()) {
@@ -154,11 +154,13 @@ public class DefaultDataProvider implements DataProvider {
       }
 
       for (final MetricSlice slice : slices) {
+        LOG.info(slice.toString());
         if (!output.containsKey(slice)){
           futures.put(slice, this.executor.submit(() -> DefaultDataProvider.this.timeseriesLoader.load(slice)));
         }
       }
       //LOG.info("Fetching {} slices of timeseries, {} cache hit, {} cache miss", slices.size(), output.size(), futures.size());
+
       // TODO: CHANGE THIS TIMEOUT BACK, JUST USING IT FOR DEBUG PURPOSES
       final long deadline = System.currentTimeMillis() + TIMEOUT * 100;
       for (MetricSlice slice : slices) {
@@ -167,6 +169,7 @@ public class DefaultDataProvider implements DataProvider {
         }
       }
       //LOG.info("Fetching {} slices used {} milliseconds", slices.size(), System.currentTimeMillis() - ts);
+
       return output;
 
     } catch (Exception e) {

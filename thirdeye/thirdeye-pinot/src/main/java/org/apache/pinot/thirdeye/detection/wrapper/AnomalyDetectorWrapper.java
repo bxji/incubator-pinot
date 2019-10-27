@@ -159,6 +159,9 @@ public class AnomalyDetectorWrapper extends DetectionPipeline {
 
   @Override
   public DetectionPipelineResult run() throws Exception {
+
+    // TODO: UNCOMMENT THIS, JUST USING FOR BRYAN BENCHMARK PURPOSES
+
     // pre-cache time series with default granularity. this is used in multiple places:
     // 1. get the last time stamp for the time series.
     // 2. to calculate current values and  baseline values for the anomalies detected
