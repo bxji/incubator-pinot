@@ -92,16 +92,16 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
     MetricSlice slice;
 
     if (cacheResponse.hasNoRows()) {
-      ThirdEyeResponse response = this.queryCache.getQueryResult(cacheResponse.getCacheRequest().getRequest());
-      insertTimeSeriesIntoCache(response);
-      cacheResponse.mergeSliceIntoRows(response, MergeSliceType.APPEND);
+      result = this.queryCache.getQueryResult(cacheResponse.getCacheRequest().getRequest());
+      insertTimeSeriesIntoCache(result);
+      cacheResponse.mergeSliceIntoRows(result);
     }
 
     if (cacheResponse.isMissingStartSlice(requestSliceStart)) {
       slice = MetricSlice.from(metricId, requestSliceStart, cacheResponse.getFirstTimestamp(), request.getFilterSet(), request.getGroupByTimeGranularity());
       result = fetchSliceFromSource(slice);
       insertTimeSeriesIntoCache(result);
-      cacheResponse.mergeSliceIntoRows(result, MergeSliceType.PREPEND);
+      cacheResponse.mergeSliceIntoRows(result);
     }
 
     if (cacheResponse.isMissingEndSlice(requestSliceEnd)) {
@@ -109,7 +109,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
       slice = MetricSlice.from(metricId, cacheResponse.getLastTimestamp() + request.getGroupByTimeGranularity().toMillis(), requestSliceEnd, request.getFilterSet(), request.getGroupByTimeGranularity());
       result = fetchSliceFromSource(slice);
       insertTimeSeriesIntoCache(result);
-      cacheResponse.mergeSliceIntoRows(result, MergeSliceType.APPEND);
+      cacheResponse.mergeSliceIntoRows(result);
     }
   }
 
