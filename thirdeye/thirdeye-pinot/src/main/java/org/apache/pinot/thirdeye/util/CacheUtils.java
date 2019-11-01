@@ -77,21 +77,12 @@ public class CacheUtils {
    * @return query string
    */
   public static String buildQuery(JsonObject parameters) {
-    StringBuilder sb = new StringBuilder("SELECT time, `")
-        .append(parameters.getString("dimensionKey"))
-        .append("` FROM `")
-        .append(parameters.getString("bucket"))
-        .append("` WHERE metricId = ")
-        .append(parameters.getLong("metricId"))
-        .append(" AND `")
-        .append(parameters.getString("dimensionKey"))
-        .append("` IS NOT MISSING")
-        .append(" AND time BETWEEN ")
-        .append(parameters.getLong("start"))
-        .append(" AND ")
-        .append(parameters.getLong("end"))
-        .append(" ORDER BY time ASC");
-
-    return sb.toString();
+    return String.format("SELECT time, `%s` FROM `%s` WHERE metricId = %d AND `%s` IS NOT MISSING AND time BETWEEN %d AND %d ORDER BY time ASC",
+        parameters.getString("dimensionKey"),
+        parameters.getString("bucket"),
+        parameters.getLong("metricId"),
+        parameters.getString("dimensionKey"),
+        parameters.getLong("start"),
+        parameters.getLong("end"));
   }
 }
