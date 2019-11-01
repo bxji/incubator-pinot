@@ -62,7 +62,21 @@ public class CouchbaseCacheDAO {
 
   /**
    * Fetches time-series data from cache. Formats it into a list of TimeSeriesDataPoints before
-   * returning.
+   * returning. The raw results will look something like this:
+   * {
+   *   {
+   *     "time": 1000,
+   *     "123456": "30.0"
+   *   },
+   *   {
+   *     "time": 2000,
+   *     "123456": "893.0"
+   *   },
+   *   {
+   *     "time": 3000,
+   *     "123456": "900.6"
+   *   }
+   * }
    * @param request ThirdEyeCacheRequest. Wrapper for ThirdEyeRequest.
    * @return list of TimeSeriesDataPoint
    * @throws Exception if query threw an error
@@ -111,7 +125,14 @@ public class CouchbaseCacheDAO {
   /**
    * Insert a TimeSeriesDataPoint into Couchbase. If a document for this data point already
    * exists within Couchbase and the data value for the metricURN already exists in the cache,
-   * we don't do anything.
+   * we don't do anything. An example document generated and inserted for this might look like:
+   * {
+   *   "time": 123456700000
+   *   "metricId": 123456,
+   *   "61427020": "3.0",
+   *   "83958352": "59.6",
+   *   "98648743": "0.0"
+   * }
    * @param point data point
    */
   public void insertTimeSeriesDataPoint(TimeSeriesDataPoint point) {
