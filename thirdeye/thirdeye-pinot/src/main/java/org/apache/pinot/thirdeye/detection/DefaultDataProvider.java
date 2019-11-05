@@ -104,7 +104,8 @@ public class DefaultDataProvider implements DataProvider {
         DETECTION_TIME_SERIES_CACHE = CacheBuilder.newBuilder()
             .maximumWeight(cacheSize)
             // Estimate that most detection tasks will complete within 15 minutes
-            .expireAfterWrite(15, TimeUnit.MINUTES)
+            //TODO: CHANGE THIS BACK BRYAN
+            .expireAfterWrite(15, TimeUnit.HOURS)
             .weigher((Weigher<MetricSlice, DataFrame>) (slice, dataFrame) -> dataFrame.size() * (Long.BYTES + Double.BYTES))
             .build(new CacheLoader<MetricSlice, DataFrame>() {
               // load single slice
@@ -157,10 +158,13 @@ public class DefaultDataProvider implements DataProvider {
         }
       }
       //LOG.info("Fetching {} slices of timeseries, {} cache hit, {} cache miss", slices.size(), output.size(), futures.size());
-      final long deadline = System.currentTimeMillis() + TIMEOUT;
+      // TODO: CHANGE TIMEOUT BACK
+      final long deadline = System.currentTimeMillis() + TIMEOUT * 1000000;
       for (MetricSlice slice : slices) {
         if (!output.containsKey(slice)) {
-          output.put(slice, futures.get(slice).get(makeTimeout(deadline), TimeUnit.MILLISECONDS));
+          // TODO: CHANGE THE TimeUnit.SECONDS BACK TO MILLISECONDS
+//          output.put(slice, futures.get(slice).get(makeTimeout(deadline), TimeUnit.SECONDS));
+          output.put(slice, futures.get(slice).get());
         }
       }
       //LOG.info("Fetching {} slices used {} milliseconds", slices.size(), System.currentTimeMillis() - ts);
@@ -208,10 +212,13 @@ public class DefaultDataProvider implements DataProvider {
         }));
       }
 
-      final long deadline = System.currentTimeMillis() + TIMEOUT;
+      // TODO: CHANGE THIS TIMEOUT BACK
+      final long deadline = System.currentTimeMillis() + TIMEOUT * 1000000;
       Map<MetricSlice, DataFrame> output = new HashMap<>();
       for (MetricSlice slice : slices) {
-        DataFrame result = futures.get(slice).get(makeTimeout(deadline), TimeUnit.MILLISECONDS);
+        // TODO: CHANGE THE TimeUnit.SECONDS BACK TO MILLISECONDS
+//        DataFrame result = futures.get(slice).get(makeTimeout(deadline), TimeUnit.SECONDS);
+        DataFrame result = futures.get(slice).get();
         // fill in time stamps
         result.dropSeries(COL_TIME).addSeries(COL_TIME, LongSeries.fillValues(result.size(), slice.getStart())).setIndex(COL_TIME);
         output.put(slice, result);

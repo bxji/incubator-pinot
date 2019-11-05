@@ -109,7 +109,9 @@ public class CurrentAndBaselineLoader {
     }
 
     executor.shutdown();
-    executor.awaitTermination(TIMEOUT, TimeUnit.MILLISECONDS);
+    // TODO: CHANGE THIS BACK BRYAN
+//    executor.awaitTermination(TIMEOUT, TimeUnit.MILLISECONDS);
+    executor.awaitTermination(TIMEOUT, TimeUnit.SECONDS);
   }
 
   private DateTimeZone getDateTimeZone(DatasetConfigDTO datasetConfigDTO) {
