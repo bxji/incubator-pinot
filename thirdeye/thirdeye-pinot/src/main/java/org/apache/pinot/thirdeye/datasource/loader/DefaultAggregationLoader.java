@@ -102,7 +102,9 @@ public class DefaultAggregationLoader implements AggregationLoader {
     List<DataFrame> results = new ArrayList<>();
     for (String dimension : dimensions) {
       RequestContainer rc = requests.get(dimension);
-      ThirdEyeResponse res = responses.get(dimension).get(makeTimeout(deadline), TimeUnit.MILLISECONDS);
+      //TODO: change this timeout back
+      ThirdEyeResponse res = responses.get(dimension).get();
+//      ThirdEyeResponse res = responses.get(dimension).get(makeTimeout(deadline), TimeUnit.MILLISECONDS);
       DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc);
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))

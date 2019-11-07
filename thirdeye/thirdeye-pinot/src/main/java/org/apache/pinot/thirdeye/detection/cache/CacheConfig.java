@@ -24,7 +24,6 @@ package org.apache.pinot.thirdeye.detection.cache;
  * Mapped from cache-config.yml
  */
 public class CacheConfig {
-
   /**
    * flags for which cache to use; recommended to only use one at a time
    */
