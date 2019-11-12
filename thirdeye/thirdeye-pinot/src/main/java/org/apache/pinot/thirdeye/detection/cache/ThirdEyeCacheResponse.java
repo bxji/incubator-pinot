@@ -69,7 +69,6 @@ public class ThirdEyeCacheResponse {
   public void setFirstTimestamp(long timestamp) {
     this.firstTimestamp = timestamp;
   }
-
   public void setLastTimestamp(long timestamp) {
     this.lastTimestamp = timestamp;
   }

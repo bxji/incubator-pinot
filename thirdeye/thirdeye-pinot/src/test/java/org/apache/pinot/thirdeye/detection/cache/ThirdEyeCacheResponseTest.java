@@ -68,6 +68,8 @@ public class ThirdEyeCacheResponseTest {
   @AfterMethod
   public void afterMethod() {
     rows.clear();
+    cacheResponse.setFirstTimestamp(Long.MAX_VALUE);
+    cacheResponse.setLastTimestamp(Long.MIN_VALUE);
   }
 
   @Test
@@ -310,6 +312,9 @@ public class ThirdEyeCacheResponseTest {
       rows.add(dataPoint);
     }
 
+    cacheResponse.setFirstTimestamp(0);
+    cacheResponse.setLastTimestamp(9000);
+
     List<String[]> newRows = new ArrayList<>();
 
     for (int i = 10; i < 20; i++) {
@@ -326,6 +331,9 @@ public class ThirdEyeCacheResponseTest {
 
     List<TimeSeriesDataPoint> rows = cacheResponse.getRows();
 
+    Assert.assertEquals(cacheResponse.getFirstTimestamp(), 0);
+    Assert.assertEquals(cacheResponse.getLastTimestamp(), 19000);
+
     for (int i = 0; i < 20; i++) {
       TimeSeriesDataPoint dp = rows.get(i);
       Assert.assertEquals(dp.getMetricId(), metricFunction.getMetricId().longValue());
@@ -333,5 +341,95 @@ public class ThirdEyeCacheResponseTest {
       Assert.assertEquals(dp.getTimestamp(), i * 1000);
       Assert.assertEquals(dp.getDataValue(), String.valueOf(i));
     }
+  }
+
+  @Test
+  public void testMergeSliceIntoRowsUpdatesMinTimestamp() {
+    for (int i = 10; i < 20; i++) {
+      TimeSeriesDataPoint dataPoint = new TimeSeriesDataPoint(metricUrn, i * 1000, metricFunction.getMetricId(), String.valueOf(i));
+      rows.add(dataPoint);
+    }
+
+    cacheResponse.setFirstTimestamp(10000);
+    cacheResponse.setLastTimestamp(19000);
+
+    List<String[]> newRows = new ArrayList<>();
+
+    for (int i = 0; i < 10; i++) {
+      String[] rawTimeSeriesDataPoint = new String[3];
+      rawTimeSeriesDataPoint[0] = String.valueOf(i);
+      rawTimeSeriesDataPoint[1] = String.valueOf(i);
+      rawTimeSeriesDataPoint[2] = String.valueOf(i * 1000);
+      newRows.add(rawTimeSeriesDataPoint);
+    }
+
+    cacheResponse.mergeSliceIntoRows(new RelationalThirdEyeResponse(request, newRows, timeSpec));
+
+    Assert.assertEquals(cacheResponse.getNumRows(), 20);
+
+    List<TimeSeriesDataPoint> rows = cacheResponse.getRows();
+
+    Assert.assertEquals(cacheResponse.getFirstTimestamp(), 0);
+    Assert.assertEquals(cacheResponse.getLastTimestamp(), 19000);
+  }
+
+  @Test
+  public void testMergeSliceIntoRowsUpdatesMaxTimestamp() {
+    for (int i = 10; i < 20; i++) {
+      TimeSeriesDataPoint dataPoint = new TimeSeriesDataPoint(metricUrn, i * 1000, metricFunction.getMetricId(), String.valueOf(i));
+      rows.add(dataPoint);
+    }
+
+    cacheResponse.setFirstTimestamp(10000);
+    cacheResponse.setLastTimestamp(19000);
+
+    List<String[]> newRows = new ArrayList<>();
+
+    for (int i = 20; i < 30; i++) {
+      String[] rawTimeSeriesDataPoint = new String[3];
+      rawTimeSeriesDataPoint[0] = String.valueOf(i);
+      rawTimeSeriesDataPoint[1] = String.valueOf(i);
+      rawTimeSeriesDataPoint[2] = String.valueOf(i * 1000);
+      newRows.add(rawTimeSeriesDataPoint);
+    }
+
+    cacheResponse.mergeSliceIntoRows(new RelationalThirdEyeResponse(request, newRows, timeSpec));
+
+    Assert.assertEquals(cacheResponse.getNumRows(), 20);
+
+    List<TimeSeriesDataPoint> rows = cacheResponse.getRows();
+
+    Assert.assertEquals(cacheResponse.getFirstTimestamp(), 10000);
+    Assert.assertEquals(cacheResponse.getLastTimestamp(), 29000);
+  }
+
+  @Test
+  public void testMergeSliceIntoRowsUpdatesMinAndMaxTimestamps() {
+    for (int i = 10; i < 20; i++) {
+      TimeSeriesDataPoint dataPoint = new TimeSeriesDataPoint(metricUrn, i * 1000, metricFunction.getMetricId(), String.valueOf(i));
+      rows.add(dataPoint);
+    }
+
+    cacheResponse.setFirstTimestamp(10000);
+    cacheResponse.setLastTimestamp(19000);
+
+    List<String[]> newRows = new ArrayList<>();
+
+    for (int i = 0; i < 4; i++) {
+      String[] rawTimeSeriesDataPoint = new String[3];
+      rawTimeSeriesDataPoint[0] = String.valueOf(i);
+      rawTimeSeriesDataPoint[1] = String.valueOf(i);
+      rawTimeSeriesDataPoint[2] = String.valueOf(i * 10000);
+      newRows.add(rawTimeSeriesDataPoint);
+    }
+
+    cacheResponse.mergeSliceIntoRows(new RelationalThirdEyeResponse(request, newRows, timeSpec));
+
+    Assert.assertEquals(cacheResponse.getNumRows(), 14);
+
+    List<TimeSeriesDataPoint> rows = cacheResponse.getRows();
+
+    Assert.assertEquals(cacheResponse.getFirstTimestamp(), 0);
+    Assert.assertEquals(cacheResponse.getLastTimestamp(), 30000);
   }
 }

@@ -288,29 +288,29 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     String tableName = SqlUtils.computeSqlTableName(dataset);
     DataSource dataSource = getDataSourceFromDataset(dataset);
 
-    try (Connection conn = dataSource.getConnection();
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(SqlUtils.getMaxDataTimeSQL(timeSpec.getColumnName(), tableName, sourceName))) {
-      if (rs.next()) {
-        String maxTimeString = rs.getString(1);
-        if (maxTimeString.indexOf('.') >= 0) {
-          maxTimeString = maxTimeString.substring(0, maxTimeString.indexOf('.'));
-        }
+    if (!sourceName.equals(PRESTO)) {
+      try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement();
+          ResultSet rs = stmt.executeQuery(SqlUtils.getMaxDataTimeSQL(timeSpec.getColumnName(), tableName, sourceName))) {
+        if (rs.next()) {
+          String maxTimeString = rs.getString(1);
+          if (maxTimeString.indexOf('.') >= 0) {
+            maxTimeString = maxTimeString.substring(0, maxTimeString.indexOf('.'));
+          }
 
-        String timeFormat = timeSpec.getFormat();
+          String timeFormat = timeSpec.getFormat();
 
-        if (StringUtils.isBlank(timeFormat) || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {
-          maxTime = timeSpec.getDataGranularity().toMillis(Long.valueOf(maxTimeString) - 1, timeZone);
-        } else {
-          DateTimeFormatter inputDataDateTimeFormatter =
-              DateTimeFormat.forPattern(timeFormat).withZone(timeZone);
-          DateTime endDateTime = DateTime.parse(maxTimeString, inputDataDateTimeFormatter);
-          Period oneBucket = datasetConfig.bucketTimeGranularity().toPeriod();
-          maxTime = endDateTime.plus(oneBucket).getMillis() - 1;
+          if (StringUtils.isBlank(timeFormat) || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {
+            maxTime = timeSpec.getDataGranularity().toMillis(Long.valueOf(maxTimeString) - 1, timeZone);
+          } else {
+            DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat).withZone(timeZone);
+            DateTime endDateTime = DateTime.parse(maxTimeString, inputDataDateTimeFormatter);
+            Period oneBucket = datasetConfig.bucketTimeGranularity().toPeriod();
+            maxTime = endDateTime.plus(oneBucket).getMillis() - 1;
+          }
         }
+      } catch (Exception e) {
+        throw e;
       }
-    } catch (Exception e) {
-      throw e;
     }
     return maxTime;
   }

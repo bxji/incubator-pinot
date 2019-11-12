@@ -46,6 +46,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private static Logger LOG = LoggerFactory.getLogger(DefaultAggregationLoader.class);
 
   private static final long TIMEOUT = 600000;
+  private static final String PRESTO = "Presto";
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
@@ -139,7 +140,13 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     DataFrame dfEmpty = DataFrame.builder(cols).build().setIndex(dimensions);
 
-    final long maxTime = this.maxTimeCache.get(dataset.getDataset());
+    long maxTime = 0;
+
+    // don't get max time for Presto, since it takes too long.
+    if (!dataset.getDataSource().equals(PRESTO)) {
+      maxTime = this.maxTimeCache.get(dataset.getDataset());
+    }
+
     if (slice.getStart() > maxTime) {
       return dfEmpty;
     }
