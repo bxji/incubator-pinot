@@ -143,9 +143,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     long maxTime = 0;
 
     // don't get max time for Presto, since it takes too long.
-    if (!dataset.getDataSource().equals(PRESTO)) {
-      maxTime = this.maxTimeCache.get(dataset.getDataset());
-    }
+    maxTime = this.maxTimeCache.get(dataset.getDataset());
 
     if (slice.getStart() > maxTime) {
       return dfEmpty;

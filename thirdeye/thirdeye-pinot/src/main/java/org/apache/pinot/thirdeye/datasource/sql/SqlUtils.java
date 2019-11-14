@@ -26,6 +26,7 @@ import com.google.common.collect.Multimap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +53,7 @@ import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -160,9 +162,9 @@ public class SqlUtils {
    * @throws ExecutionException
    */
   public static String getSql(ThirdEyeRequest request, MetricFunction metricFunction,
-      Multimap<String, String> filterSet, TimeSpec dataTimeSpec, String sourceName) {
+      Multimap<String, String> filterSet, TimeSpec dataTimeSpec, DateTimeZone timeZone, String sourceName) {
     return getSql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(), filterSet,
-        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec, request.getLimit(), sourceName);
+        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec, timeZone, request.getLimit(), sourceName);
   }
 
   /**
@@ -237,7 +239,7 @@ public class SqlUtils {
 
   private static String getSql(MetricFunction metricFunction, DateTime startTime,
       DateTime endTimeExclusive, Multimap<String, String> filterSet, List<String> groupBy,
-      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit, String sourceName) {
+      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, DateTimeZone timeZone, int limit, String sourceName) {
 
     MetricConfigDTO metricConfig = ThirdEyeUtils.getMetricConfigFromId(metricFunction.getMetricId());
     String dataset = metricFunction.getDataset();
@@ -247,7 +249,7 @@ public class SqlUtils {
     String tableName = computeSqlTableName(dataset);
 
     sb.append("SELECT ").append(selectionClause).append(" FROM ").append(tableName);
-    String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec, sourceName);
+    String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec, timeZone, sourceName);
     String datePartitionClause = getDatePartitionClause(startTime);
     sb.append(" WHERE ");
     if (sourceName.equals(PRESTO)) {
@@ -324,7 +326,7 @@ public class SqlUtils {
     return datasetName.substring(tableComponents[0].length()+tableComponents[1].length()+2);
   }
 
-  static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeFieldSpec, String sourceName) {
+  static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeFieldSpec, DateTimeZone timeZone, String sourceName) {
     TimeGranularity dataGranularity = timeFieldSpec.getDataGranularity();
     long dataGranularityMillis = dataGranularity.toMillis();
 
@@ -343,11 +345,23 @@ public class SqlUtils {
       return String.format(" %s BETWEEN %d AND %d", timeField, startUnits, endUnits);
     }
 
+    /**
+     * We will need to throw away parts of the Date to fit the user date format in dataset.
+     * However, we need to consider how the user handles daylight savings time, and we need
+     * to match that.
+     *
+     * For example, if user has yyyyMMdd format time field, we have no way of knowing how
+     * they are dealing with daylight savings time. It may be worth making it a requirement
+     * for presto users to have a standard time format.
+     */
+
     // NOTE:
     // this is crazy. epoch rounds up, but timeFormat down
     // we maintain this behavior for backward compatibility.
     long startUnits = (long) Math.ceil(start.getMillis()) / 1000;
     long endUnits = (long) Math.ceil(endExclusive.getMillis()) / 1000;
+
+    //DateTimeFormatter fmt = DateTimeFormat.forPattern(timeFormat).withZone(DateTimeZone.forID(dataset.getTimezone()));
 
     if (Objects.equals(startUnits, endUnits)) {
       return String.format(" %s = %d", getToUnixTimeClause(timeFormat, timeField, sourceName), startUnits);
@@ -598,6 +612,13 @@ public class SqlUtils {
    * @return
    */
   private static String getToUnixTimeClause(String timeFormat, String timeColumn, String sourceName) {
+//    String timeFormat = timeSpec.getFormat();
+//    String timeColumn = timeSpec.getColumnName();
+//
+//    if (timeFormat.equals("yyyyMMdd")) {
+//
+//    }
+
     if (sourceName.equals(PRESTO)) {
       return "TO_UNIXTIME(PARSE_DATETIME(CAST(" + timeColumn + " AS VARCHAR), '" + timeFormat + "'))";
     } else if (sourceName.equals(MYSQL)) {
@@ -609,4 +630,18 @@ public class SqlUtils {
     }
     return "";
   }
+
+//  private String getTimeClause(String timeFormat, String timeColumn, String sourceName) {
+//    if (sourceName.equals(PRESTO)) {
+//      if ()
+//      return "TO_UNIXTIME(PARSE_DATETIME(CAST(" + timeColumn + " AS VARCHAR), '" + timeFormat + "'))";
+//    } else if (sourceName.equals(MYSQL)) {
+//      return "UNIX_TIMESTAMP(STR_TO_DATE(CAST(" + timeColumn + " AS CHAR), '" + timeFormatToMySQLFormat(timeFormat) + "'))";
+//    } else if (sourceName.equals(H2)){
+//      return "TO_UNIXTIME(PARSEDATETIME(CAST(" + timeColumn + " AS VARCHAR), '" + timeFormat + "'))";
+//    } else if (sourceName.equals(VERTICA)) {
+//      return "EXTRACT(EPOCH FROM to_timestamp(to_char(" + timeColumn + "), '" + timeFormatToVerticaFormat(timeFormat) + "'))";
+//    }
+//    return "";
+//  }
 }

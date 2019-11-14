@@ -36,6 +36,7 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +67,7 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
         String dataset = metricFunction.getDataset();
         DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(dataset);
         TimeSpec dataTimeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+        DateTimeZone timeZone = DateTimeZone.forID(datasetConfig.getTimezone());
 
         if (timeSpec == null) {
           timeSpec = dataTimeSpec;
@@ -75,7 +77,7 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
         sourceName = tableComponents[0];
         String dbName = tableComponents[1];
 
-        String sqlQuery = SqlUtils.getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, sourceName);
+        String sqlQuery = SqlUtils.getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, timeZone, sourceName);
         ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(new SqlQuery(sqlQuery, sourceName, dbName,
             metricFunction.getMetricName(), request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec));
 
@@ -125,7 +127,6 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public long getMaxDataTime(String dataset) throws Exception {
-    LOG.info("Getting max data time for " + dataset);
     return sqlResponseCacheLoader.getMaxDataTime(dataset);
   }
 

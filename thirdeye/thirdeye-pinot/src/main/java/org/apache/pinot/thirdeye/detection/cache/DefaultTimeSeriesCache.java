@@ -107,7 +107,6 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
     long metricId = request.getMetricFunctions().get(0).getMetricId();
     long requestSliceStart = request.getStartTimeInclusive().getMillis();
     long requestSliceEnd = request.getEndTimeExclusive().getMillis();
-    //long requestSliceEnd = request.getEndTimeExclusive().getMillis() - request.getGroupByTimeGranularity().toMillis();
 
     ThirdEyeResponse result;
     MetricSlice slice;

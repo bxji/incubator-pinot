@@ -57,7 +57,7 @@ public class DefaultInputDataFetcher implements InputDataFetcher {
   public InputData fetchData(InputDataSpec inputDataSpec) {
     long ts = System.currentTimeMillis();
     Map<MetricSlice, DataFrame> timeseries = provider.fetchTimeseries(inputDataSpec.getTimeseriesSlices());
-    System.out.println("HI_BRYAN " + (System.currentTimeMillis() - ts));
+    //System.out.println("HI_BRYAN " + (System.currentTimeMillis() - ts));
     Map<MetricSlice, DataFrame> aggregates = provider.fetchAggregates(inputDataSpec.getAggregateSlices(), Collections.<String>emptyList());
     Multimap<AnomalySlice, MergedAnomalyResultDTO> existingAnomalies = provider.fetchAnomalies(inputDataSpec.getAnomalySlices(), configId);
     Multimap<EventSlice, EventDTO> events = provider.fetchEvents(inputDataSpec.getEventSlices());
@@ -66,6 +66,7 @@ public class DefaultInputDataFetcher implements InputDataFetcher {
     Multimap<EvaluationSlice, EvaluationDTO> evaluations = provider.fetchEvaluations(inputDataSpec.getEvaluationSlices(), configId);
     Map<Long, DatasetConfigDTO> datasetForMetricId = fetchDatasetForMetricId(inputDataSpec.getMetricIdsForDatasets());
     Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> metricForMetricAndDatasetName = fetchMetricForDatasetAndMetricNames(inputDataSpec.getMetricAndDatasetNames());
+    System.out.println("HI_BRYAN " + (System.currentTimeMillis() - ts));
     return new InputData(inputDataSpec, timeseries, aggregates, existingAnomalies, events, metrics, datasets, evaluations, datasetForMetricId, metricForMetricAndDatasetName);
   }
 
