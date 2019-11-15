@@ -60,7 +60,7 @@ public class TimeSeriesCacheTest {
   private CouchbaseCacheDAO cacheDAO;
   private DefaultTimeSeriesCache cache;
 
-  private boolean centralizedCacheToggle = CacheConfig.useCentralizedCache();
+  private boolean centralizedCacheToggle = CacheConfig.getInstance().useCentralizedCache();
   private CacheConfig config = new CacheConfig();
 
   ExecutorService executor;

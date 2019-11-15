@@ -78,7 +78,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    */
   public ThirdEyeResponse fetchTimeSeries(ThirdEyeRequest thirdEyeRequest) throws Exception {
 
-    if (!CacheConfig.useCentralizedCache()) {
+    if (!CacheConfig.getInstance().useCentralizedCache()) {
       return this.queryCache.getQueryResult(thirdEyeRequest);
     }
 

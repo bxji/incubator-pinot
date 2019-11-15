@@ -138,7 +138,7 @@ public class ThirdEyeCacheResponse {
 
       // add all missing timestamps between previous timestamp and current timestamp to
       // the list of missing timestamps.
-      while (previousTimestamp + timeGranularity != currentTimestamp) {
+      while (previousTimestamp + timeGranularity < currentTimestamp) {
         missingTimestamps.add(String.valueOf(previousTimestamp + timeGranularity));
         previousTimestamp += timeGranularity;
       }
