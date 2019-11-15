@@ -122,7 +122,8 @@ public class ThirdEyeCacheRegistry {
         ThirdEyeCacheRegistry.getInstance().registerTimeSeriesCache(timeSeriesCache);
       }
     } catch (Exception e) {
-      LOGGER.info("Caught exception while initializing centralized cache", e);
+      LOGGER.error("Caught exception while initializing centralized cache", e);
+      System.exit(1);
     }
   }
 
