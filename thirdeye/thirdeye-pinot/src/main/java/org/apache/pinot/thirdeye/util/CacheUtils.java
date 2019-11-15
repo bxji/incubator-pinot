@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.util;
 
 import com.couchbase.client.java.document.json.JsonObject;
 import java.util.zip.CRC32;
+import org.apache.pinot.thirdeye.detection.cache.CacheConstants;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint;
 
 
@@ -59,8 +60,8 @@ public class CacheUtils {
    */
   public static JsonObject buildDocumentStructure(TimeSeriesDataPoint point) {
     JsonObject body = JsonObject.create()
-        .put("time", point.getTimestamp())
-        .put("metricId", point.getMetricId())
+        .put(CacheConstants.TIME, point.getTimestamp())
+        .put(CacheConstants.METRIC_ID, point.getMetricId())
         .put(point.getMetricUrnHash(), point.getDataValue());
     return body;
   }

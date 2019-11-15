@@ -324,7 +324,7 @@ public class ThirdEyeCacheResponseTest {
 
     Assert.assertEquals(cacheResponse.getNumRows(), 20);
 
-    List<TimeSeriesDataPoint> rows = cacheResponse.getRows();
+    List<TimeSeriesDataPoint> rows = cacheResponse.getTimeSeriesRows();
 
     for (int i = 0; i < 20; i++) {
       TimeSeriesDataPoint dp = rows.get(i);
