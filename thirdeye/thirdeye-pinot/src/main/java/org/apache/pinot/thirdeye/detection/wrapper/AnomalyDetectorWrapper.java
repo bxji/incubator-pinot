@@ -159,7 +159,7 @@ public class AnomalyDetectorWrapper extends DetectionPipeline {
     // 1. get the last time stamp for the time series.
     // 2. to calculate current values and  baseline values for the anomalies detected
     // 3. anomaly detection current and baseline time series value
-    if (CacheConfig.useCentralizedCache() || CacheConfig.useInMemoryCache()) {
+    if (CacheConfig.getInstance().useCentralizedCache() || CacheConfig.getInstance().useInMemoryCache()) {
       if (this.cachingPeriodLookback >= 0) {
         MetricSlice cacheSlice = MetricSlice.from(this.metricEntity.getId(), startTime - cachingPeriodLookback, endTime,
             this.metricEntity.getFilters());
