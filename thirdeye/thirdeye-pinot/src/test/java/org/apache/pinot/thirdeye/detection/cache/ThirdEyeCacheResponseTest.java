@@ -58,7 +58,7 @@ public class ThirdEyeCacheResponseTest {
   private static final TimeSpec timeSpec = new TimeSpec(METRIC.getMetricName(), TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
 
   private static final String metricUrn = MetricEntity.fromMetric(request.getFilterSet().asMap(), metricFunction.getMetricId()).getUrn();
-  private static final ThirdEyeCacheRequest cacheRequest = new ThirdEyeCacheRequest(request,1L, metricUrn,1000L, 20000L);
+  private static final ThirdEyeCacheRequest cacheRequest = ThirdEyeCacheRequest.from(request);
 
   @BeforeMethod
   public void beforeMethod() {
