@@ -109,11 +109,27 @@ public class ThirdEyeCacheRegistry {
       } else {
         CacheDataSource dataSource = CacheConfig.getInstance().getCentralizedCacheSettings().getDataSourceConfig();
 
-        cacheConfig.setHost(dataSource.getHost());
-        cacheConfig.setAuthUsername(dataSource.getAuthUsername());
-        cacheConfig.setAuthPassword(dataSource.getAuthPassword());
+        cacheConfig.setUseCertificateBasedAuthentication(dataSource.useCertificateBasedAuthentication());
+        cacheConfig.setHosts(dataSource.getHosts());
         cacheConfig.setBucketName(dataSource.getBucketName());
+
+        if (cacheConfig.useCertificateBasedAuthentication()) {
+          cacheConfig.setKeyStoreFilePath(dataSource.getKeyStoreFilePath());
+          cacheConfig.setKeyStorePassword(dataSource.getKeyStorePassword());
+          cacheConfig.setTrustStoreFilePath(dataSource.getTrustStoreFilePath());
+          cacheConfig.setTrustStorePassword(dataSource.getTrustStorePassword());
+        } else {
+          cacheConfig.setAuthUsername(dataSource.getAuthUsername());
+          cacheConfig.setAuthPassword(dataSource.getAuthPassword());
+        }
       }
+
+      System.out.println(cacheConfig.getHosts());
+      System.out.println(cacheConfig.getKeyStoreFilePath());
+      System.out.println(cacheConfig.getKeyStorePassword());
+      System.out.println(cacheConfig.getTrustStoreFilePath());
+      System.out.println(cacheConfig.getTrustStorePassword());
+      System.out.println(cacheConfig.useCertificateBasedAuthentication());
 
       if (INSTANCE.getTimeSeriesCache() == null) {
         // TODO: add generic cache DAO

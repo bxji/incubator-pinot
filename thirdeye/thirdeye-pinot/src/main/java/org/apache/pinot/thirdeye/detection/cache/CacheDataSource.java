@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.cache;
 
+import java.util.List;
+
+
 /**
  * Config for a single centralized cache data source.
  * For example, this class could be for Couchbase, or Redis, or Cassandra, etc.
@@ -26,23 +29,51 @@ package org.apache.pinot.thirdeye.detection.cache;
 public class CacheDataSource {
 
   /**
-   * authentication stuff.
+   * Authentication type
    */
-  private String host;
+  private boolean useCertificateBasedAuthentication;
+
+  /**
+   * Cluster information
+   */
+  private List<String> hosts;
+  private String bucketName;
+
+  /**
+   * Username/password based authentication fields
+   */
   private String authUsername;
   private String authPassword;
-  private String bucketName;
+
+  /**
+   * Certificate-based Authentication fields
+   */
+  private String keyStoreFilePath;
+  private String keyStorePassword;
+  private String trustStoreFilePath;
+  private String trustStorePassword;
 
   // left blank
   public CacheDataSource() {}
 
-  public String getHost() { return host; }
+  public boolean useCertificateBasedAuthentication() { return useCertificateBasedAuthentication; }
+
+  public List<String> getHosts() { return hosts; }
+  public String getBucketName() { return bucketName; }
   public String getAuthUsername() { return authUsername; }
   public String getAuthPassword() { return authPassword; }
-  public String getBucketName() { return bucketName; }
+  public String getKeyStoreFilePath() { return keyStoreFilePath; }
+  public String getKeyStorePassword() { return keyStorePassword; }
+  public String getTrustStoreFilePath() { return trustStoreFilePath; }
+  public String getTrustStorePassword() { return trustStorePassword; }
 
-  public void setHost(String host) { this.host = host; }
+  public void setUseCertificateBasedAuthentication(boolean useCertificateBasedAuthentication) { this.useCertificateBasedAuthentication = useCertificateBasedAuthentication; }
+  public void setHosts(List<String> hosts) { this.hosts = hosts; }
+  public void setBucketName(String bucketName) { this.bucketName = bucketName; }
   public void setAuthUsername(String authUsername) { this.authUsername = authUsername; }
   public void setAuthPassword(String authPassword) { this.authPassword = authPassword; }
-  public void setBucketName(String bucketName) { this.bucketName = bucketName; }
+  public void setKeyStoreFilePath(String keyStoreFilePath) { this.keyStoreFilePath = keyStoreFilePath; }
+  public void setKeyStorePassword(String keyStorePassword) { this.keyStorePassword = keyStorePassword; }
+  public void setTrustStoreFilePath(String trustStoreFilePath) { this.trustStoreFilePath = trustStoreFilePath; }
+  public void setTrustStorePassword(String trustStorePassword) { this.trustStorePassword = trustStorePassword; }
 }

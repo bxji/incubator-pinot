@@ -22,8 +22,11 @@ package org.apache.pinot.thirdeye.detection.cache;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.auth.CertAuthenticator;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.env.CouchbaseEnvironment;
+import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
@@ -55,9 +58,34 @@ public class CouchbaseCacheDAO {
    * Initialize connection to Couchbase and open bucket where data is stored.
    */
   private void createDataStoreConnection() {
-    Cluster cluster = CouchbaseCluster.create(CacheConfig.getInstance().getHost());
-    cluster.authenticate(CacheConfig.getInstance().getAuthUsername(),
-                         CacheConfig.getInstance().getAuthPassword());
+//    Cluster cluster = CouchbaseCluster.create(CacheConfig.getInstance().getHost());
+//    cluster.authenticate(CacheConfig.getInstance().getAuthUsername(),
+//                         CacheConfig.getInstance().getAuthPassword());
+//    this.bucket = cluster.openBucket(CacheConfig.getInstance().getBucketName());
+
+    // nodes can be a list
+    Cluster cluster;
+
+    CacheConfig config = CacheConfig.getInstance();
+
+    if (config.useCertificateBasedAuthentication()) {
+      CouchbaseEnvironment env = DefaultCouchbaseEnvironment
+          .builder()
+          .sslEnabled(true)
+          .certAuthEnabled(true)
+          .sslKeystoreFile(config.getKeyStoreFilePath())
+          .sslKeystorePassword(config.getKeyStorePassword())
+          .sslTruststoreFile(config.getTrustStoreFilePath())
+          .sslTruststorePassword(config.getTrustStorePassword())
+          .build();
+
+      cluster = CouchbaseCluster.create(env, CacheUtils.getBootstrapHosts(config.getHosts()));
+      cluster.authenticate(CertAuthenticator.INSTANCE);
+    } else {
+      cluster = CouchbaseCluster.create(CacheConfig.getInstance().getHosts());
+      cluster.authenticate(CacheConfig.getInstance().getAuthUsername(), CacheConfig.getInstance().getAuthPassword());
+    }
+
     this.bucket = cluster.openBucket(CacheConfig.getInstance().getBucketName());
   }
 

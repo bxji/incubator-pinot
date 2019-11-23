@@ -88,7 +88,7 @@ public class ThirdEyeCacheResponse {
    */
 
   public boolean isMissingSlice(long sliceStart, long sliceEnd) {
-    checkAndLogMissingMiddleSlices();
+    //checkAndLogMissingMiddleSlices();
     return isMissingStartSlice(sliceStart) || isMissingEndSlice(sliceEnd);
   }
 

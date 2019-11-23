@@ -20,9 +20,15 @@
 package org.apache.pinot.thirdeye.util;
 
 import com.couchbase.client.java.document.json.JsonObject;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.CRC32;
 import org.apache.pinot.thirdeye.detection.cache.CacheConstants;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,6 +37,7 @@ import org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint;
 
 public class CacheUtils {
 
+  private static final Logger LOG = LoggerFactory.getLogger(CacheUtils.class);
   // We use CRC32 as the hash function to generate keys for cache documents.
   public static CRC32 hashGenerator = new CRC32();
 
@@ -85,5 +92,25 @@ public class CacheUtils {
         parameters.getString("dimensionKey"),
         parameters.getLong("start"),
         parameters.getLong("end"));
+  }
+
+  public static List<String> getBootstrapHosts(List<String> bootstrapUris) {
+    try {
+      List<String> bootstrapHosts = new ArrayList<>(bootstrapUris.size());
+      for (String url : bootstrapUris) {
+        URI uri = new URI(url);
+        // The next workaround is to correctly parse urls that don't include any schema
+        if (uri.getHost() == null) {
+          uri = new URI("http://" + url);
+        }
+        String host = uri.getHost();
+        bootstrapHosts.add(host);
+      }
+
+      return bootstrapHosts;
+    } catch (URISyntaxException e) {
+      LOG.error("Exception while parsing hosts from given URIs: ", e);
+      return null;
+    }
   }
 }
