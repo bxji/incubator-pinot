@@ -1,7 +1,5 @@
-
-# please use at most one cache at a time, either the in-memory cache or the centralized cache.
-useInMemoryCache: true
-useCentralizedCache: false
+useInMemoryCache: false
+useCentralizedCache: true
 
 centralizedCacheSettings:
   # TTL (time-to-live) for documents in seconds
@@ -9,13 +7,20 @@ centralizedCacheSettings:
   # if inserting data points individually, max number of threads to spawn to parallel insert at a time
   maxParallelInserts: 10
   # which store to use
-  cacheDataStoreName: couchbase
+  cacheDataStoreName: 'couchbase'
   cacheDataSources:
     couchbase:
-      className: org.apache.pinot.thirdeye.detection.cache.CouchbaseCacheDAO
-      # host can just be localhost if you're using this locally.
-      host: your_host
-      authUsername: your_username
-      authPassword: your_password
-      bucketName: your_bucket_name
+      useCertificateBasedAuthentication: true
+      hosts: 
+        - 'http://localhost:8091'
+      bucketName: 'thirdeye-cache'
+      # if using certificate-based authentication, authUsername and authPassword values don't matter and won't be used
+      authUsername: 'thirdeye'
+      authPassword: 'thirdeye'
+      # certificate based authentication is only available in Couchbase enterprise edition. 
+      keyStoreFilePath: 'var/identity.p12'
+      # by default, Java uses this password to enable empty passwords for certificates.
+      keyStorePassword: 'work_around_jdk-6879539'
+      trustStoreFilePath: '/etc/riddler/cacerts'
+      trustStorePassword: ''
     # add your store of choice here
