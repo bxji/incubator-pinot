@@ -85,6 +85,7 @@ public class CacheConfig {
   public void setCentralizedCacheSettings(CentralizedCacheConfig centralizedCacheConfig) { centralizedCacheSettings = centralizedCacheConfig; }
 
   public void setUseCertificateBasedAuthentication(boolean useCertificateBasedAuthentication) { CacheConfig.useCertificateBasedAuthentication = useCertificateBasedAuthentication; }
+  // note that we are making a copy since input array is not static.
   public void setHosts(List<String> hosts) {
     CacheConfig.hosts = new ArrayList<>();
     CacheConfig.hosts.addAll(hosts);
