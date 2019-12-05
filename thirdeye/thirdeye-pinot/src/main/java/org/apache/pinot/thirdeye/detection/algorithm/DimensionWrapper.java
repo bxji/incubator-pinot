@@ -111,7 +111,6 @@ public class DimensionWrapper extends DetectionPipeline {
   private final DateTimeZone timezone;
   private DateTime start;
   private DateTime end;
-  private final long cachingPeriodLookback;
 
   protected final String nestedMetricUrnKey;
   protected final List<String> dimensions;
